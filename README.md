@@ -258,6 +258,15 @@ peak grip is *falling*, and a negative stiffness in an implicit solve amplifies)
 that a 1.35 kg·m² wheel spins up ~15× too fast and the car looks like it is made
 of paper.
 
+## Docs
+
+- [`AGENTS.md`](AGENTS.md) — how to work in this repo: the rules, the two tests
+  that gate every change, the traps (each one cost a debugging session).
+- [`docs/physics.md`](docs/physics.md) — the model end to end with the actual
+  numbers: per-step order, tyre curves, the implicit wheel solve, DOF table.
+- [`docs/car-model.md`](docs/car-model.md) — the body recipe: extruded profile
+  with cut arches, proportions, measure-before-you-place, wheels, env map.
+
 ## Files
 
 ```
