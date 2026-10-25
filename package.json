@@ -1,0 +1,20 @@
+{
+  "name": "tyres-not-tweens",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A vehicle simulation where the car is moved by tyre forces at the contact patch, not by authored motion. three.js + Rapier.",
+  "scripts": {
+    "start": "python3 serve.py",
+    "test": "node --test tests/",
+    "build:single": "node scripts/bundle-single.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  },
+  "dependencies": {
+    "@dimforge/rapier3d-compat": "^0.14.0",
+    "three": "^0.180.0"
+  },
+  "license": "MIT"
+}

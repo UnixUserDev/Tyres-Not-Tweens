@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tyres, Not Tweens — a vehicle simulation</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "./vendor/three/three.module.js",
+          "@dimforge/rapier3d-compat": "./vendor/rapier/rapier.es.js"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <canvas id="view"></canvas>
+
+    <div id="hud">
+      <section class="cluster speed-cluster">
+        <div class="speed">
+          <span id="speed-value">0</span>
+          <span class="unit">km/h</span>
+        </div>
+        <div class="gear">
+          <span class="label">gear</span>
+          <span id="gear-value">N</span>
+        </div>
+      </section>
+
+      <section class="cluster rpm-cluster">
+        <div class="rpm-track">
+          <div class="rpm-redline"></div>
+          <div id="rpm-fill" class="rpm-fill"></div>
+        </div>
+        <div class="rpm-read"><span id="rpm-value">850</span> rpm</div>
+        <div class="pedals">
+          <div class="pedal"><span class="label">thr</span><div class="bar"><i id="thr-fill"></i></div></div>
+          <div class="pedal"><span class="label">brk</span><div class="bar"><i id="brk-fill"></i></div></div>
+        </div>
+      </section>
+
+      <section class="cluster wheels-cluster">
+        <div id="wheel-grid" class="wheel-grid"></div>
+      </section>
+
+      <div id="flags" class="flags"></div>
+
+      <section class="cluster readout">
+        <div class="row"><span>mode</span><b id="drive-mode">RWD</b></div>
+        <div class="row"><span>map</span><b id="scenario-value">playground</b></div>
+        <div class="row"><span>friction used</span><b id="grip-value">0.00</b></div>
+        <div class="row"><span>lat / long g</span><b id="g-value">0.00 / 0.00</b></div>
+        <div class="row"><span>body roll</span><b id="roll-value">0.0°</b></div>
+        <div class="row"><span>contact patches</span><b id="contact-value">4/4</b></div>
+        <div class="row"><span>build</span><b id="build-value">—</b></div>
+      </section>
+    </div>
+
+    <div id="help">
+      <b>W A S D</b> drive · <b>space</b> handbrake · <b>R</b> reset · <b>C</b> camera ·
+      <b>F</b> force vectors · <b>T</b> traction control · <b>G</b> drive mode · <b>B</b> map · <b>M</b> mute · <b>P</b> pause · <b>gamepad</b> supported
+      <span class="disclosure">
+        forces are applied at the contact patches — yaw, roll and pitch are integrated, never written
+      </span>
+    </div>
+
+    <div id="toast"></div>
+
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
