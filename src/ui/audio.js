@@ -7,6 +7,7 @@
  *   crank rpm -> 4 detuned oscillators (firing harmonics) -> lowpass -> master
  *   throttle  -> intake noise -> bandpass
  *   slip/util -> noise -> resonant bandpass      (squeal)
+ *   lift-off at rpm -> noise bursts              (overrun afterfire)
  *   speed     -> noise -> lowpass                (wind)
  */
 
@@ -138,7 +139,85 @@ export class CarAudio {
     windFilter.connect(this.master);
     noise(this.windGain);
 
+    // overrun state: pops fire on a real lift-off, not on a timer
+    this.prevThrottle = 0;
+    this.prevGear = 1;
+    this.lastPopAt = -1;
+    this.popCount = 0;
+
     this.ready = true;
+  }
+
+  /**
+   * Overrun afterfire (what everyone calls backfire).
+   *
+   * No combustion is simulated. It is gated on the condition that actually
+   * causes it: fuel cut at high rpm with the throttle shut, so unburnt charge
+   * hits a hot exhaust. Because both gates come from the drivetrain, it fires
+   * when you lift at speed and stays silent when you lift at a crawl, and the
+   * auto downshift (which is also a fuel cut) crackles for free.
+   */
+  _overrun(car, throttle, rpm, t) {
+    const lifted = this.prevThrottle > 0.3 && throttle < 0.12;
+    const gear = car.telemetry.gear;
+    const downshifted = gear < this.prevGear && Math.abs(car.telemetry.speed) > 9 && rpm > 3400;
+    this.prevThrottle = throttle;
+    this.prevGear = gear;
+
+    if (t - this.lastPopAt < 0.45) return;
+    if (!lifted && !downshifted) return;
+    if (rpm < 3000) return;
+
+    const intensity = Math.min(1, (rpm - 2600) / 4200) * (lifted ? 1 : 0.6);
+    this.lastPopAt = t;
+    this.exhaustPop(intensity, t);
+  }
+
+  /** 2-5 short, randomly-spaced cracks through a movable bandpass. */
+  exhaustPop(intensity, t) {
+    const ctx = this.ctx;
+    const count = 2 + Math.floor(Math.random() * 4);
+    this.popCount += count;
+
+    // the first crack carries a low body thump: burst in a pipe, not a click
+    const thump = ctx.createOscillator();
+    thump.type = 'sine';
+    thump.frequency.setValueAtTime(105, t + 0.02);
+    thump.frequency.exponentialRampToValueAtTime(58, t + 0.11);
+    const thumpGain = ctx.createGain();
+    thumpGain.gain.setValueAtTime(0.0001, t + 0.02);
+    thumpGain.gain.exponentialRampToValueAtTime(0.16 * intensity, t + 0.028);
+    thumpGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
+    thump.connect(thumpGain);
+    thumpGain.connect(this.master);
+    thump.start(t + 0.02);
+    thump.stop(t + 0.2);
+
+    let when = t + 0.02;
+    for (let i = 0; i < count; i++) {
+      const src = ctx.createBufferSource();
+      src.buffer = this.noiseBuffer;
+      src.playbackRate.value = 0.85 + Math.random() * 0.5;
+
+      const band = ctx.createBiquadFilter();
+      band.type = 'bandpass';
+      band.frequency.value = 340 + Math.random() * 460;
+      band.Q.value = 0.9 + Math.random() * 1.1;
+
+      const gain = ctx.createGain();
+      const amp = 0.2 * intensity * (0.45 + Math.random() * 0.55);
+      gain.gain.setValueAtTime(0.0001, when);
+      gain.gain.exponentialRampToValueAtTime(Math.max(0.0002, amp), when + 0.004);
+      gain.gain.exponentialRampToValueAtTime(0.0001, when + 0.05 + Math.random() * 0.04);
+
+      src.connect(band);
+      band.connect(gain);
+      gain.connect(this.master);
+      src.start(when);
+      src.stop(when + 0.14);
+
+      when += 0.03 + Math.random() * 0.075; // irregular spacing, never a rattle
+    }
   }
 
   setMuted(muted) {
@@ -224,6 +303,8 @@ export class CarAudio {
     this.engineGain.gain.setTargetAtTime(0.1 * load, t, 0.05);
     this.engineFilter.frequency.setTargetAtTime(420 + rpm * 0.16 + throttle * 1600, t, 0.06);
     this.intakeGain.gain.setTargetAtTime(0.05 * throttle * Math.min(1, rpm / 6500), t, 0.06);
+
+    this._overrun(car, throttle, rpm, t);
 
     // Tyre squeal from the contact patch actually sliding. Grip *used* is not
     // sliding: a clean launch sits at ~100 % utilisation with the tread barely

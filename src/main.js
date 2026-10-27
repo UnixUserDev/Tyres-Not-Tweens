@@ -16,10 +16,22 @@ import { ForceOverlay } from './scene/forces.js';
 import { Hud } from './ui/hud.js';
 import { CarAudio } from './ui/audio.js';
 
-const BUILD = 'b43';
+const BUILD = 'b44';
 
 /** Yield long enough for the browser to actually paint what we have drawn. */
-const nextFrame = () => new Promise((resolve) => requestAnimationFrame(() => resolve()));
+const nextFrame = () =>
+  new Promise((resolve) => {
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      resolve();
+    };
+    requestAnimationFrame(finish);
+    // A backgrounded or occluded tab stops receiving frames, which would stall
+    // the boot forever mid-stage. Time out instead and carry on.
+    setTimeout(finish, 60);
+  });
 
 // ---- 1. renderer first, so the very first paint is the sky rather than a
 // black page. Everything below is heavy (wasm decode, textures, a PMREM pass)

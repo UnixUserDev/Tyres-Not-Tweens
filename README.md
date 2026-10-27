@@ -180,6 +180,14 @@ There are no samples. Every sound is synthesised from the simulation's own state
   A genuinely violent stroke (shaft speed > 4 m/s) counts as an impact too. It
   is deliberately not driven by shaft speed alone, which fires constantly over
   rough ground.
+- **Overrun afterfire** — the crackle when you lift off at high revs (what most
+  people call backfire; real backfire is combustion in the *intake*, which means
+  something is broken). Nothing is a sample and no combustion is modelled: it is
+  gated on the condition that causes it, throttle shut above 3000 rpm with fuel
+  cut, so it fires when you lift at speed and stays silent when you lift at a
+  crawl. Two to five randomly spaced noise bursts through a movable bandpass, the
+  first with a 105→58 Hz thump, plus a quieter crackle when the auto box drops a
+  gear under braking (that is a fuel cut too).
 - **Wind** — noise through a lowpass, level with airspeed squared.
 
 It starts on the first key press or click (browser autoplay rules), and `M`
