@@ -16,7 +16,7 @@ import { ForceOverlay } from './scene/forces.js';
 import { Hud } from './ui/hud.js';
 import { CarAudio } from './ui/audio.js';
 
-const BUILD = 'b44';
+const BUILD = 'b46';
 
 /** Yield long enough for the browser to actually paint what we have drawn. */
 const nextFrame = () =>

@@ -12,7 +12,7 @@
 
 import * as THREE from 'three';
 
-const PAINT = 0xb63a2f;
+const PAINT = 0x1d3557;
 
 const BOTTOM = -0.36; // under-body line, 0.22 m off the ground
 const ARCH_Y = -0.25; // wheel centre (0.33 m radius, 0.58 m ride height)
